@@ -13,37 +13,73 @@ function addItem(e)
         description:description,
         category:category
    }
-   localStorage.setItem(expense.description,JSON.stringify(expense));
-   showuser(expense);
+   axios.post("https://crudcrud.com/api/f7518c576fa94dd1aafc17c7a981048a/expenseData",expense)
+   .then((response)=>
+   {
+     showuser(expense)
+     console.log(response);
+   }).catch((error)=>
+   {
+      document.body.innerHTML=`<li>Something went wrong</li>`
+      console.error(error)
+   })
+   
   
 }
+window.addEventListener("DOMContentLoaded", () => {
+  axios.get("https://crudcrud.com/api/f7518c576fa94dd1aafc17c7a981048a/expenseData")
+  .then((response)=>
+  {
+    for(var i=0;i<response.data.length;i++)
+    {
+      showuser(response.data[i])
+    }
+  }).catch((error)=>
+  {
+    console.log(error)
+  })
+  
+})
+
 function showuser(exp)
 {
   const parentnode=document.getElementById('items');
-  const child=`<li  class=" fw-bold text-dark" id=${exp.description}>${exp.value} ${exp.description} ${exp.category}
-              <button onclick=editUser('${exp.value}','${exp.description}','${exp.category}') class="btn btn-secondary fs-6" >edit</button>
-              <button onclick=removeUser('${exp.description}') class="btn btn-secondary fs-6">delete</button>
-                                      </li$>`
+  const child=`<li  class="fw-bold text-dark" id='${exp._id}'>${exp.value} ${exp.description} ${exp.category}
+              <button onclick=editUser('${exp.value}','${exp.description}','${exp.category}','${exp._id}') class="btn btn-secondary fs-6" >edit</button>
+              <button onclick=removeUser('${exp._id}') class="btn btn-secondary fs-6">delete</button>
+                                      </li>`
   parentnode.innerHTML=parentnode.innerHTML+child;
 }
 
-function removeUser(description)
+function removeUser(expid)
 {
-  localStorage.removeItem(description);
-  removeUSerFromScreen(description);
+
+  axios.delete(`https://crudcrud.com/api/f7518c576fa94dd1aafc17c7a981048a/expenseData/${expid}`)
+  .then((response)=>
+  {
+        removeUSerFromScreen(expid);
+        //console.log(response);
+  })
+  .catch((error)=>
+  {
+    console.error(error)
+  })
+  
 }
 
-function removeUSerFromScreen(description)
+function removeUSerFromScreen(expid)
 {
    const parentNode=document.getElementById('items');
-   const child=document.getElementById(description);
+   const child=document.getElementById(expid);
+   
    parentNode.removeChild(child);
 }
 
-function editUser(value,description,category)
+function editUser(value,description,category,expid)
 {
   document.getElementById('numbers').value=value;
   document.getElementById('description').value=description;
   document.getElementById('category').value=category;
-  removeUser(description);
+
+  removeUser(expid)
 }
